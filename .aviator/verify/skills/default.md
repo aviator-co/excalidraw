@@ -8,13 +8,10 @@ Excalidraw is an infinite-canvas whiteboard / diagramming tool. The preview
 serves the full app as a single-page application at the preview URL.
 
 **There is no login and no sign-up.** Navigating to the preview URL lands you
-straight on a usable canvas. There is also effectively only one route —
+straight on a usable, empty canvas. There is also effectively only one route —
 everything happens on `/`. Deep links use URL fragments (`#json=`, `#room=`),
 and those depend on backend services that are not reachable from the preview,
 so treat them as unavailable.
-
-**The canvas is not empty.** It opens on a seeded diagram — see below. This is
-expected, not leftover state from another run.
 
 ## The one thing that changes how you gather evidence
 
@@ -50,39 +47,7 @@ To draw something:
    colour, background, fill style, stroke width, edges, opacity and layers.
 
 Selecting an element is what makes the left-hand properties panel appear, so a
-scenario about styling controls usually needs a shape drawn first — though the
-seeded elements below also work, and clicking one is faster than drawing.
-
-## What is already on the canvas
-
-The preview opens on a seeded scene: a URL-shortener system design, 14 elements,
-monochrome. Laid out left to right at 100% zoom, scroll (0,0):
-
-- A **title** ("URL Shortener (bit.ly) - System Design") and a one-line subtitle
-- **Client** — rounded rectangle, far left
-- **Primary Server** — larger rounded rectangle, centre
-- **Database** — ellipse, right
-- Two **bidirectional arrows**: Client ↔ Primary Server, Primary Server ↔ Database
-- Text labels: `POST /urls` / `GET /{short_code}`, a `Write:` block above the
-  server, a `Read:` block below it, and a `Urls` schema list on the right
-
-Use it. A scenario that needs an existing shape to select, move, restyle, delete
-or export should reach for one of these rather than drawing its own — it removes
-a whole setup step and its failure modes.
-
-Two things follow from how the seeding works:
-
-- **It is per browser context.** The scene is written to `localStorage` on first
-  load by a script the preview injects. A fresh context always starts from the
-  same 14 elements, so scenario order does not matter and nothing needs cleaning
-  up between runs.
-- **`?reseed=1` restores it.** If a scenario has mutated the canvas past the
-  point of usefulness, navigating to `<preview-url>/?reseed=1` puts the original
-  scene back. A plain reload does *not* — it preserves whatever is there, by
-  design.
-
-Do not treat the presence of these elements as a regression, and do not write
-scenarios that assert the canvas is empty on load.
+scenario about styling controls usually needs a shape drawn first.
 
 ## What is NOT exercised here
 
@@ -91,9 +56,8 @@ Do not write scenarios that depend on these — they cannot pass in a preview:
 - **Live collaboration / sharing.** These need an external websocket server and
   backend that the sandbox cannot reach.
 - **Anything server-side.** Excalidraw keeps scenes in browser `localStorage`,
-  not on a server. There is no database to inspect and no server-side state to
-  assert against. (The seeded scene is not an exception — it is written into
-  `localStorage` by the browser itself on first load.)
+  not on a server. There is no database to inspect and nothing to seed — the
+  canvas legitimately starts empty on every fresh browser context.
 - **Library browsing from the public registry**, which fetches from an external
   host.
 - **Export flows that upload**, e.g. share links. Local export actions that only
